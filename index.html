@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transport Choice Survey | BUS-ECO Project</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f5f4f0;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #1a56db;
+    --accent-light: #e8effe;
+    --border: #d8d5cc;
+    --success: #0d7a4e;
+    --danger: #c0392b;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--text);
+    color: #fff;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .04em;
+    opacity: .7;
+  }
+  header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  header button {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.35);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  header button:hover { background: rgba(255,255,255,.1); }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── SURVEY VIEW ── */
+  .survey-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 16px 60px;
+  }
+
+  .survey-intro {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: #2c3e7a;
+  }
+  .survey-intro strong { display: block; font-size: 14px; margin-bottom: 4px; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  .q-block label.q-text {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .q-block label.q-text span.req { color: var(--danger); margin-left: 2px; }
+
+  /* Radio / checkbox options */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options.inline { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    font-size: 14px;
+    background: #fafaf8;
+  }
+  .opt:hover { border-color: var(--accent); background: var(--accent-light); }
+  .opt input { accent-color: var(--accent); width: 15px; height: 15px; }
+  .opt.selected { border-color: var(--accent); background: var(--accent-light); }
+
+  /* Scale row */
+  .scale-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .scale-row .scale-opt {
+    flex: 1;
+    min-width: 36px;
+    text-align: center;
+  }
+  .scale-row .scale-opt input[type=radio] { display: none; }
+  .scale-row .scale-opt label {
+    display: block;
+    padding: 8px 4px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--mono);
+    transition: all .15s;
+    background: #fafaf8;
+  }
+  .scale-row .scale-opt input:checked + label {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .scale-row .scale-opt label:hover { border-color: var(--accent); }
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: var(--mono);
+  }
+
+  /* Submit */
+  .submit-wrap { margin-top: 32px; text-align: center; }
+  .btn-submit {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 14px 48px;
+    font-size: 15px;
+    font-family: var(--sans);
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+    letter-spacing: .02em;
+  }
+  .btn-submit:hover { background: #1344b8; }
+  .btn-submit:active { transform: scale(.98); }
+
+  .error-msg {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 8px;
+    font-family: var(--mono);
+    display: none;
+  }
+
+  /* ── THANKYOU ── */
+  .thankyou-wrap {
+    max-width: 540px;
+    margin: 80px auto;
+    text-align: center;
+    padding: 16px;
+  }
+  .thankyou-wrap .icon { font-size: 56px; margin-bottom: 20px; }
+  .thankyou-wrap h2 { font-size: 22px; margin-bottom: 10px; }
+  .thankyou-wrap p { color: var(--muted); font-size: 14px; }
+
+  /* ── ADMIN LOGIN ── */
+  .admin-login-wrap {
+    max-width: 380px;
+    margin: 100px auto;
+    padding: 16px;
+  }
+  .admin-login-wrap h2 {
+    font-family: var(--mono);
+    font-size: 15px;
+    margin-bottom: 24px;
+    letter-spacing: .06em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .admin-login-wrap input[type=password] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 15px;
+    font-family: var(--mono);
+    background: var(--card);
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .admin-login-wrap input:focus { border-color: var(--accent); }
+  .btn-admin-login {
+    width: 100%;
+    padding: 12px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: var(--sans);
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  .btn-admin-login:hover { opacity: .85; }
+  .login-err { color: var(--danger); font-size: 12px; font-family: var(--mono); margin-top: 8px; display: none; }
+
+  /* ── ADMIN DASHBOARD ── */
+  .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .admin-topbar h2 { font-size: 18px; font-weight: 600; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-card .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .admin-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all .15s;
+  }
+  .admin-btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+  .admin-btn.danger:hover { background: var(--danger); color: #fff; }
+  .admin-btn.export { border-color: var(--success); color: var(--success); background: transparent; }
+  .admin-btn.export:hover { background: var(--success); color: #fff; }
+  .admin-btn.logout { border-color: var(--border); color: var(--muted); background: transparent; }
+  .admin-btn.logout:hover { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border); border-radius: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+    background: #fafaf8;
+    position: sticky;
+    top: 0;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0ede6;
+    vertical-align: top;
+    max-width: 160px;
+    word-break: break-word;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--accent-light); }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: #bbb;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color .15s;
+  }
+  .del-btn:hover { color: var(--danger); }
+
+  .empty-state {
+    padding: 48px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  /* Charts section */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px;
+  }
+  .chart-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .bar-item {
+    margin-bottom: 8px;
+  }
+  .bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 3px;
+    color: var(--muted);
+  }
+  .bar-track {
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 5px;
+    transition: width .4s;
+  }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--muted);
+    transition: all .15s;
+  }
+  .tab-btn.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+
+  @media(max-width:480px) {
+    .scale-row { flex-direction: row; }
+    .scale-row .scale-opt label { padding: 7px 2px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">BUS-ECO PROJECT / 2025</span>
+  <h1>Transportation Services — Consumer Survey</h1>
+  <button onclick="showAdminLogin()">Admin ⌘</button>
+</header>
+
+<!-- ════ SURVEY VIEW ════ -->
+<div id="view-survey" class="view active">
+  <div class="survey-wrap">
+
+    <div class="survey-intro">
+      <strong>📋 Consumer Decision-Making Survey</strong>
+      This survey is part of a Business Economics project studying how people choose between cab, metro, and bus services. It takes ~3 minutes. All responses are anonymous.
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="section-label">Section 1 — Respondent Profile</div>
+
+    <div class="q-block">
+      <label class="q-text">Q1. What is your age group? <span class="req">*</span></label>
+      <div class="options" id="q1">
+        <label class="opt"><input type="radio" name="q1" value="Under 18"> Under 18</label>
+        <label class="opt"><input type="radio" name="q1" value="18–22 (Student)"> 18–22 (Student)</label>
+        <label class="opt"><input type="radio" name="q1" value="23–30 (Young Professional)"> 23–30 (Young Professional)</label>
+        <label class="opt"><input type="radio" name="q1" value="31–45"> 31–45</label>
+        <label class="opt"><input type="radio" name="q1" value="46 and above"> 46 and above</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q2. What is your occupation? <span class="req">*</span></label>
+      <div class="options" id="q2">
+        <label class="opt"><input type="radio" name="q2" value="Student"> Student</label>
+        <label class="opt"><input type="radio" name="q2" value="Salaried / Working Professional"> Salaried / Working Professional</label>
+        <label class="opt"><input type="radio" name="q2" value="Self-Employed / Business"> Self-Employed / Business</label>
+        <label class="opt"><input type="radio" name="q2" value="Homemaker"> Homemaker</label>
+        <label class="opt"><input type="radio" name="q2" value="Other"> Other</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q3. What is your approximate monthly personal income / pocket money / allowance? <span class="req">*</span></label>
+      <div class="options" id="q3">
+        <label class="opt"><input type="radio" name="q3" value="Below ₹5,000"> Below ₹5,000</label>
+        <label class="opt"><input type="radio" name="q3" value="₹5,000 – ₹15,000"> ₹5,000 – ₹15,000</label>
+        <label class="opt"><input type="radio" name="q3" value="₹15,001 – ₹35,000"> ₹15,001 – ₹35,000</label>
+        <label class="opt"><input type="radio" name="q3" value="₹35,001 – ₹60,000"> ₹35,001 – ₹60,000</label>
+        <label class="opt"><input type="radio" name="q3" value="Above ₹60,000"> Above ₹60,000</label>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section-label">Section 2 — Transport Usage & Preferences</div>
+
+    <div class="q-block">
+      <label class="q-text">Q4. Which transport mode do you use MOST often for daily travel? <span class="req">*</span></label>
+      <div class="options" id="q4">
+        <label class="opt"><input type="radio" name="q4" value="App-based Cab (Ola/Uber)"> App-based Cab (Ola/Uber)</label>
+        <label class="opt"><input type="radio" name="q4" value="Metro / Local Train"> Metro / Local Train</label>
+        <label class="opt"><input type="radio" name="q4" value="City Bus / DTC / BEST etc."> City Bus / DTC / BEST etc.</label>
+        <label class="opt"><input type="radio" name="q4" value="Auto-rickshaw"> Auto-rickshaw</label>
+        <label class="opt"><input type="radio" name="q4" value="Personal Vehicle (bike/car)"> Personal Vehicle (bike/car)</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q5. How much do you spend on transport per day (on average)? <span class="req">*</span></label>
+      <div class="options" id="q5">
+        <label class="opt"><input type="radio" name="q5" value="Less than ₹30"> Less than ₹30</label>
+        <label class="opt"><input type="radio" name="q5" value="₹30 – ₹80"> ₹30 – ₹80</label>
+        <label class="opt"><input type="radio" name="q5" value="₹81 – ₹150"> ₹81 – ₹150</label>
+        <label class="opt"><input type="radio" name="q5" value="₹151 – ₹300"> ₹151 – ₹300</label>
+        <label class="opt"><input type="radio" name="q5" value="More than ₹300"> More than ₹300</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q6. Which factor matters MOST when you choose your transport mode? <span class="req">*</span></label>
+      <div class="options" id="q6">
+        <label class="opt"><input type="radio" name="q6" value="Price / Fare"> Price / Fare</label>
+        <label class="opt"><input type="radio" name="q6" value="Comfort & Quality of ride"> Comfort & Quality of ride</label>
+        <label class="opt"><input type="radio" name="q6" value="Speed & Time saved"> Speed & Time saved</label>
+        <label class="opt"><input type="radio" name="q6" value="Convenience & Availability"> Convenience & Availability</label>
+        <label class="opt"><input type="radio" name="q6" value="Safety"> Safety</label>
+      </div>
+    </div>
+
+    <!-- SECTION 3 - Price Sensitivity -->
+    <div class="section-label">Section 3 — Price Sensitivity</div>
+
+    <div class="q-block">
+      <label class="q-text">Q7. If cab fares increase by 30%, what would you do? <span class="req">*</span></label>
+      <div class="options" id="q7">
+        <label class="opt"><input type="radio" name="q7" value="Continue using cabs as usual"> Continue using cabs as usual</label>
+        <label class="opt"><input type="radio" name="q7" value="Use cabs less, switch partially to metro/bus"> Use cabs less, switch partially to metro/bus</label>
+        <label class="opt"><input type="radio" name="q7" value="Completely switch to metro/bus"> Completely switch to metro/bus</label>
+        <label class="opt"><input type="radio" name="q7" value="Use personal vehicle instead"> Use personal vehicle instead</label>
+        <label class="opt"><input type="radio" name="q7" value="I do not use cabs"> I do not use cabs</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q8. On average, what is the MAXIMUM fare you consider acceptable for a 5 km cab ride? <span class="req">*</span></label>
+      <div class="options inline" id="q8">
+        <label class="opt"><input type="radio" name="q8" value="Below ₹60"> Below ₹60</label>
+        <label class="opt"><input type="radio" name="q8" value="₹60 – ₹100"> ₹60 – ₹100</label>
+        <label class="opt"><input type="radio" name="q8" value="₹101 – ₹150"> ₹101 – ₹150</label>
+        <label class="opt"><input type="radio" name="q8" value="₹151 – ₹200"> ₹151 – ₹200</label>
+        <label class="opt"><input type="radio" name="q8" value="Above ₹200"> Above ₹200</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q9. Do surge pricing / dynamic pricing affect your decision to book a cab? <span class="req">*</span></label>
+      <div class="options" id="q9">
+        <label class="opt"><input type="radio" name="q9" value="Yes, always switch to another option"> Yes, always switch to another option</label>
+        <label class="opt"><input type="radio" name="q9" value="Yes, sometimes switch"> Yes, sometimes switch</label>
+        <label class="opt"><input type="radio" name="q9" value="No, I still book the cab"> No, I still book the cab</label>
+        <label class="opt"><input type="radio" name="q9" value="I wait for surge to drop"> I wait for surge to drop</label>
+      </div>
+    </div>
+
+    <!-- SECTION 4 - Quality & Brand -->
+    <div class="section-label">Section 4 — Quality, Brand & Substitutes</div>
+
+    <div class="q-block">
+      <label class="q-text">Q10. How would you rate the QUALITY (comfort, cleanliness, AC) of App-based Cabs? <span class="req">*</span></label>
+      <div class="scale-row" id="q10">
+        <div class="scale-opt"><input type="radio" name="q10" value="1" id="q10_1"><label for="q10_1">1</label></div>
+        <div class="scale-opt"><input type="radio" name="q10" value="2" id="q10_2"><label for="q10_2">2</label></div>
+        <div class="scale-opt"><input type="radio" name="q10" value="3" id="q10_3"><label for="q10_3">3</label></div>
+        <div class="scale-opt"><input type="radio" name="q10" value="4" id="q10_4"><label for="q10_4">4</label></div>
+        <div class="scale-opt"><input type="radio" name="q10" value="5" id="q10_5"><label for="q10_5">5</label></div>
+      </div>
+      <div class="scale-labels"><span>Poor</span><span>Excellent</span></div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q11. How would you rate the QUALITY (cleanliness, frequency, coverage) of Metro / Local Train? <span class="req">*</span></label>
+      <div class="scale-row" id="q11">
+        <div class="scale-opt"><input type="radio" name="q11" value="1" id="q11_1"><label for="q11_1">1</label></div>
+        <div class="scale-opt"><input type="radio" name="q11" value="2" id="q11_2"><label for="q11_2">2</label></div>
+        <div class="scale-opt"><input type="radio" name="q11" value="3" id="q11_3"><label for="q11_3">3</label></div>
+        <div class="scale-opt"><input type="radio" name="q11" value="4" id="q11_4"><label for="q11_4">4</label></div>
+        <div class="scale-opt"><input type="radio" name="q11" value="5" id="q11_5"><label for="q11_5">5</label></div>
+      </div>
+      <div class="scale-labels"><span>Poor</span><span>Excellent</span></div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q12. How would you rate the QUALITY of City Bus service? <span class="req">*</span></label>
+      <div class="scale-row" id="q12">
+        <div class="scale-opt"><input type="radio" name="q12" value="1" id="q12_1"><label for="q12_1">1</label></div>
+        <div class="scale-opt"><input type="radio" name="q12" value="2" id="q12_2"><label for="q12_2">2</label></div>
+        <div class="scale-opt"><input type="radio" name="q12" value="3" id="q12_3"><label for="q12_3">3</label></div>
+        <div class="scale-opt"><input type="radio" name="q12" value="4" id="q12_4"><label for="q12_4">4</label></div>
+        <div class="scale-opt"><input type="radio" name="q12" value="5" id="q12_5"><label for="q12_5">5</label></div>
+      </div>
+      <div class="scale-labels"><span>Poor</span><span>Excellent</span></div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q13. Do you prefer a specific brand / app for booking a cab? <span class="req">*</span></label>
+      <div class="options inline" id="q13">
+        <label class="opt"><input type="radio" name="q13" value="Ola"> Ola</label>
+        <label class="opt"><input type="radio" name="q13" value="Uber"> Uber</label>
+        <label class="opt"><input type="radio" name="q13" value="Both equally"> Both equally</label>
+        <label class="opt"><input type="radio" name="q13" value="Rapido / Others"> Rapido / Others</label>
+        <label class="opt"><input type="radio" name="q13" value="Don't use cabs"> Don't use cabs</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q14. If metro is available on your route, do you prefer it over a cab? <span class="req">*</span></label>
+      <div class="options" id="q14">
+        <label class="opt"><input type="radio" name="q14" value="Yes, always prefer metro"> Yes, always prefer metro</label>
+        <label class="opt"><input type="radio" name="q14" value="Yes, mostly — unless in a hurry"> Yes, mostly — unless in a hurry</label>
+        <label class="opt"><input type="radio" name="q14" value="No, I prefer the cab"> No, I prefer the cab</label>
+        <label class="opt"><input type="radio" name="q14" value="Depends on time of day"> Depends on time of day</label>
+        <label class="opt"><input type="radio" name="q14" value="Metro not available in my city"> Metro not available in my city</label>
+      </div>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="section-label">Section 5 — Economic Behavior</div>
+
+    <div class="q-block">
+      <label class="q-text">Q15. Do you use discount coupons or offers while booking cabs? <span class="req">*</span></label>
+      <div class="options" id="q15">
+        <label class="opt"><input type="radio" name="q15" value="Always look for and apply offers"> Always look for and apply offers</label>
+        <label class="opt"><input type="radio" name="q15" value="Sometimes, if easily available"> Sometimes, if easily available</label>
+        <label class="opt"><input type="radio" name="q15" value="Rarely bother"> Rarely bother</label>
+        <label class="opt"><input type="radio" name="q15" value="Never — I just book"> Never — I just book</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q16. Does your income level / budget significantly influence your choice of transport? <span class="req">*</span></label>
+      <div class="options" id="q16">
+        <label class="opt"><input type="radio" name="q16" value="Yes, budget is the primary reason"> Yes, budget is the primary reason</label>
+        <label class="opt"><input type="radio" name="q16" value="Yes, it has some influence"> Yes, it has some influence</label>
+        <label class="opt"><input type="radio" name="q16" value="No, I choose based on comfort/convenience"> No, I choose based on comfort/convenience</label>
+        <label class="opt"><input type="radio" name="q16" value="No, cost is not a concern"> No, cost is not a concern</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q17. When you are short on money near month-end, which transport do you switch to? <span class="req">*</span></label>
+      <div class="options" id="q17">
+        <label class="opt"><input type="radio" name="q17" value="Metro / Local Train"> Metro / Local Train</label>
+        <label class="opt"><input type="radio" name="q17" value="City Bus"> City Bus</label>
+        <label class="opt"><input type="radio" name="q17" value="Walk or cycle"> Walk or cycle</label>
+        <label class="opt"><input type="radio" name="q17" value="Share / pool rides"> Share / pool rides</label>
+        <label class="opt"><input type="radio" name="q17" value="My transport choices don't change"> My transport choices don't change</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q18. How satisfied are you OVERALL with available transport options in your city? <span class="req">*</span></label>
+      <div class="scale-row" id="q18">
+        <div class="scale-opt"><input type="radio" name="q18" value="1" id="q18_1"><label for="q18_1">1</label></div>
+        <div class="scale-opt"><input type="radio" name="q18" value="2" id="q18_2"><label for="q18_2">2</label></div>
+        <div class="scale-opt"><input type="radio" name="q18" value="3" id="q18_3"><label for="q18_3">3</label></div>
+        <div class="scale-opt"><input type="radio" name="q18" value="4" id="q18_4"><label for="q18_4">4</label></div>
+        <div class="scale-opt"><input type="radio" name="q18" value="5" id="q18_5"><label for="q18_5">5</label></div>
+      </div>
+      <div class="scale-labels"><span>Very Dissatisfied</span><span>Very Satisfied</span></div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q19. Which transport option gives the BEST value for money in your opinion? <span class="req">*</span></label>
+      <div class="options" id="q19">
+        <label class="opt"><input type="radio" name="q19" value="App-based Cab"> App-based Cab</label>
+        <label class="opt"><input type="radio" name="q19" value="Metro / Local Train"> Metro / Local Train</label>
+        <label class="opt"><input type="radio" name="q19" value="City Bus"> City Bus</label>
+        <label class="opt"><input type="radio" name="q19" value="Auto-rickshaw"> Auto-rickshaw</label>
+        <label class="opt"><input type="radio" name="q19" value="Personal Vehicle"> Personal Vehicle</label>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <label class="q-text">Q20. Would you switch permanently to public transport (metro/bus) if it became more reliable and comfortable? <span class="req">*</span></label>
+      <div class="options" id="q20">
+        <label class="opt"><input type="radio" name="q20" value="Yes, definitely"> Yes, definitely</label>
+        <label class="opt"><input type="radio" name="q20" value="Probably yes"> Probably yes</label>
+        <label class="opt"><input type="radio" name="q20" value="Unlikely — I prefer comfort of cabs"> Unlikely — I prefer comfort of cabs</label>
+        <label class="opt"><input type="radio" name="q20" value="No, I already use public transport"> No, I already use public transport</label>
+        <label class="opt"><input type="radio" name="q20" value="No, I use personal vehicle"> No, I use personal vehicle</label>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <div id="submit-err" class="error-msg">⚠ Please answer all questions before submitting.</div>
+      <button class="btn-submit" onclick="submitSurvey()">Submit Response →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ THANK YOU VIEW ════ -->
+<div id="view-thankyou" class="view">
+  <div class="thankyou-wrap">
+    <div class="icon">✅</div>
+    <h2>Thank you for your response!</h2>
+    <p>Your input has been recorded. This survey is part of a Business Economics research project on consumer transport decision-making.</p>
+  </div>
+</div>
+
+<!-- ════ ADMIN LOGIN VIEW ════ -->
+<div id="view-admin-login" class="view">
+  <div class="admin-login-wrap">
+    <h2>Admin Access</h2>
+    <input type="password" id="admin-pw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="btn-admin-login" onclick="adminLogin()">Login →</button>
+    <div class="login-err" id="login-err">Incorrect password. Try again.</div>
+    <div style="margin-top:20px;">
+      <button onclick="showView('survey')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--mono);">← Back to Survey</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ ADMIN DASHBOARD VIEW ════ -->
+<div id="view-admin" class="view">
+  <div class="admin-wrap">
+
+    <div class="admin-topbar">
+      <h2>Survey Responses</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="admin-btn export" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="admin-btn danger" onclick="clearAll()">🗑 Clear All</button>
+        <button class="admin-btn logout" onclick="adminLogout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('responses', this)">Responses Table</button>
+      <button class="tab-btn" onclick="switchTab('charts', this)">Analysis Charts</button>
+    </div>
+
+    <div id="tab-responses">
+      <div class="table-wrap">
+        <table id="resp-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Time</th>
+              <th>Age</th>
+              <th>Occupation</th>
+              <th>Income</th>
+              <th>Main Mode</th>
+              <th>Daily Spend</th>
+              <th>Key Factor</th>
+              <th>If Cab ↑30%</th>
+              <th>Max Cab Fare</th>
+              <th>Surge Effect</th>
+              <th>Cab Quality</th>
+              <th>Metro Quality</th>
+              <th>Bus Quality</th>
+              <th>Cab Brand</th>
+              <th>Metro vs Cab</th>
+              <th>Uses Offers?</th>
+              <th>Budget Influence</th>
+              <th>Month-end Switch</th>
+              <th>Overall Satisfaction</th>
+              <th>Best Value</th>
+              <th>Switch to Public?</th>
+              <th>Del</th>
+            </tr>
+          </thead>
+          <tbody id="resp-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="display:none">No responses yet. Share the survey link to collect data.</div>
+      </div>
+    </div>
+
+    <div id="tab-charts" style="display:none">
+      <div class="charts-grid" id="charts-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const ADMIN_PASSWORD = "buseco2025"; // ← change this if you want
+const STORAGE_KEY    = "buseco_survey_responses";
+
+// ── ROUTING ──
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+}
+function showAdminLogin() { showView('admin-login'); document.getElementById('admin-pw').value=''; document.getElementById('login-err').style.display='none'; }
+
+// ── ADMIN AUTH ──
+function adminLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    showView('admin');
+    renderDashboard();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+function adminLogout() { showView('survey'); }
+
+// ── SURVEY SUBMIT ──
+const QUESTIONS = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','q16','q17','q18','q19','q20'];
+function submitSurvey() {
+  const answers = {};
+  let allAnswered = true;
+  for (const q of QUESTIONS) {
+    const sel = document.querySelector(`input[name="${q}"]:checked`);
+    if (!sel) { allAnswered = false; break; }
+    answers[q] = sel.value;
+  }
+  if (!allAnswered) {
+    const err = document.getElementById('submit-err');
+    err.style.display = 'block';
+    // scroll to first unanswered
+    for (const q of QUESTIONS) {
+      if (!document.querySelector(`input[name="${q}"]:checked`)) {
+        document.querySelector(`input[name="${q}"]`).closest('.q-block').scrollIntoView({behavior:'smooth', block:'center'});
+        break;
+      }
+    }
+    return;
+  }
+  answers.timestamp = new Date().toLocaleString('en-IN');
+  const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  stored.push(answers);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  showView('thankyou');
+}
+
+// ── DASHBOARD RENDER ──
+function getResponses() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+
+function renderDashboard() {
+  const data = getResponses();
+  renderStats(data);
+  renderTable(data);
+  renderCharts(data);
+}
+
+function renderStats(data) {
+  const n = data.length;
+  // avg satisfaction
+  const avgSat = n ? (data.reduce((a,r)=>a+parseInt(r.q18||0),0)/n).toFixed(1) : '—';
+  // most common mode
+  const modeCount = {};
+  data.forEach(r => { modeCount[r.q4] = (modeCount[r.q4]||0)+1; });
+  const topMode = n ? Object.entries(modeCount).sort((a,b)=>b[1]-a[1])[0]?.[0]?.split('(')[0].trim() : '—';
+  // most cited factor
+  const factCount = {};
+  data.forEach(r => { factCount[r.q6] = (factCount[r.q6]||0)+1; });
+  const topFactor = n ? Object.entries(factCount).sort((a,b)=>b[1]-a[1])[0]?.[0] : '—';
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><span class="num">${n}</span><div class="lbl">Total Responses</div></div>
+    <div class="stat-card"><span class="num">${avgSat}</span><div class="lbl">Avg Satisfaction (/5)</div></div>
+    <div class="stat-card"><span class="num" style="font-size:16px">${topMode}</span><div class="lbl">Most Used Mode</div></div>
+    <div class="stat-card"><span class="num" style="font-size:14px">${topFactor || '—'}</span><div class="lbl">Top Decision Factor</div></div>
+  `;
+}
+
+const COL_LABELS = ['Age','Occupation','Income/Budget','Main Transport Mode','Daily Spend','Key Decision Factor','If Cab Fare ↑30%','Max Acceptable Cab Fare (5km)','Surge Pricing Effect','Cab Quality (1-5)','Metro Quality (1-5)','Bus Quality (1-5)','Preferred Cab Brand','Metro vs Cab Preference','Uses Coupon/Offers','Budget Influence','Month-end Mode Switch','Overall Satisfaction (1-5)','Best Value Transport','Switch to Public?'];
+
+function renderTable(data) {
+  const tbody = document.getElementById('resp-tbody');
+  const empty = document.getElementById('empty-state');
+  if (!data.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = data.map((r,i) => `
+    <tr>
+      <td style="font-family:var(--mono);color:var(--muted)">${i+1}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.timestamp||''}</td>
+      ${QUESTIONS.map(q=>`<td>${r[q]||''}</td>`).join('')}
+      <td><button class="del-btn" onclick="deleteEntry(${i})">✕</button></td>
+    </tr>`).join('');
+}
+
+function deleteEntry(i) {
+  if (!confirm('Delete this response?')) return;
+  const d = getResponses(); d.splice(i,1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+  renderDashboard();
+}
+function clearAll() {
+  if (!confirm('Delete ALL responses? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderDashboard();
+}
+
+// ── CHARTS ──
+const CHART_QUESTIONS = [
+  { key:'q4', label:'Most Used Transport Mode' },
+  { key:'q6', label:'Key Decision Factor' },
+  { key:'q3', label:'Income / Budget Range' },
+  { key:'q7', label:'Response to 30% Cab Fare Hike' },
+  { key:'q9', label:'Effect of Surge Pricing' },
+  { key:'q19', label:'Best Value for Money Transport' },
+  { key:'q16', label:'Budget Influence on Choice' },
+  { key:'q20', label:'Would Switch to Public Transport?' },
+];
+
+function renderCharts(data) {
+  const grid = document.getElementById('charts-grid');
+  if (!data.length) { grid.innerHTML='<div class="empty-state">No data yet.</div>'; return; }
+  grid.innerHTML = CHART_QUESTIONS.map(cq => {
+    const counts = {};
+    data.forEach(r => { if(r[cq.key]) counts[r[cq.key]] = (counts[r[cq.key]]||0)+1; });
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const max = sorted[0]?.[1] || 1;
+    const bars = sorted.map(([label, count]) => `
+      <div class="bar-item">
+        <div class="bar-label"><span>${label}</span><span>${count} (${Math.round(count/data.length*100)}%)</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%"></div></div>
+      </div>`).join('');
+    return `<div class="chart-card"><h3>${cq.label}</h3>${bars}</div>`;
+  }).join('');
+}
+
+// ── EXPORT CSV ──
+function exportCSV() {
+  const data = getResponses();
+  if (!data.length) { alert('No responses to export.'); return; }
+  const headers = ['#','Timestamp',...COL_LABELS];
+  const rows = data.map((r,i) => [i+1, r.timestamp, ...QUESTIONS.map(q=>r[q]||'')]);
+  const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='transport_survey_responses.csv'; a.click();
+}
+
+// ── TABS ──
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-responses').style.display = tab==='responses'?'':'none';
+  document.getElementById('tab-charts').style.display = tab==='charts'?'':'none';
+  if (tab==='charts') renderCharts(getResponses());
+}
+
+// ── OPT HIGHLIGHT (visual) ──
+document.querySelectorAll('.opt input').forEach(inp => {
+  inp.addEventListener('change', () => {
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => i.closest('.opt').classList.remove('selected'));
+    inp.closest('.opt').classList.add('selected');
+  });
+});
+</script>
+</body>
+</html>
